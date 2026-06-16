@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>創意走廊 | AI × 無人機 × 機器人教育專家</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#2563eb',   // 科技藍
+                            purple: '#7c3aed', // 高級紫
+                            mint: '#10b981',   // 薄荷綠
+                            slate: '#f8fafc',  // 霧面底色
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['PingFang TC', 'Noto Sans TC', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* 玻璃擬態 (Glassmorphism) */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 40px -10px rgba(31, 38, 135, 0.05);
+        }
+        
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* 打字機光標動畫 */
+        .cursor-blink::after {
+            content: '|';
+            animation: blink 0.8s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* 漸層環境光晕 */
+        .radial-glow-1 {
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.07) 0%, rgba(255, 255, 255, 0) 70%);
+        }
+        .radial-glow-2 {
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+        }
+
+        /* AI 科技感淡色網格背景 */
+        .tech-grid {
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(37, 99, 235, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(37, 99, 235, 0.02) 1px, transparent 1px);
+        }
+
+        /* 滾動動畫漸入 (Scroll Reveal) */
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-element.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 薄荷綠按鈕閃爍/呼吸特效 */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 20px 8px rgba(16, 185, 129, 0.25); }
+        }
+        .cta-hover-effect:hover {
+            animation: pulse-glow 1.5s infinite;
+        }
+
+        /* 作品集邊框發光 */
+        .portfolio-card {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .portfolio-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(37, 99, 235, 0.35);
+            box-shadow: 0 15px 40px -10px rgba(37, 99, 235, 0.12);
+        }
+    </style>
+</head>
+<body class="bg-brand-slate text-slate-800 font-sans relative overflow-x-hidden selection:bg-brand-blue/10 selection:text-brand-blue tech-grid">
+
+    <!-- 頂部及全站漸層環境光晕 -->
+    <div class="absolute top-0 left-1/4 w-[600px] h-[600px] radial-glow-1 -z-10 pointer-events-none"></div>
+    <div class="absolute top-[500px] right-1/4 w-[500px] h-[500px] radial-glow-2 -z-10 pointer-events-none"></div>
+    <div class="absolute top-[1800px] left-10 w-[700px] h-[700px] radial-glow-1 -z-10 pointer-events-none"></div>
+    <div class="absolute top-[3200px] right-10 w-[600px] h-[600px] radial-glow-2 -z-10 pointer-events-none"></div>
+
+    <!-- 背景 Canvas 粒子連線 -->
+    <canvas id="particleCanvas" class="absolute top-0 left-0 w-full h-full -z-20 pointer-events-none"></canvas>
+
+    <!-- 1️⃣ 導覽列 Navigation -->
+    <header class="fixed top-0 left-0 w-full z-50 glass-nav transition-all duration-300" id="mainHeader">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <!-- 品牌 Logo -->
+            <a href="#home" class="flex items-center space-x-2.5">
+                <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center text-white shadow-md shadow-brand-blue/20">
+                    <i data-lucide="compass" class="w-5.5 h-5.5"></i>
+                </span>
+                <span class="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-wide">
+                    創意走廊
+                </span>
+            </a>
+
+            <!-- 桌面端選單 -->
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="#home" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-blue transition-colors relative" data-sec="home">首頁</a>
+                <a href="#about" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-blue transition-colors relative" data-sec="about">關於我</a>
+                <a href="#services" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-blue transition-colors relative" data-sec="services">AI 解決方案</a>
+                <a href="#portfolio" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-blue transition-colors relative" data-sec="portfolio">案例展示</a>
+                <a href="#blog" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-blue transition-colors relative" data-sec="blog">科技觀點</a>
+                <a href="#contact" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-blue transition-colors relative" data-sec="contact">聯絡諮詢</a>
+            </nav>
+
+            <!-- 桌面端預約 CTA 按鈕 -->
+            <div class="hidden md:block">
+                <a href="https://calendar.app.google/esxAJknJptd19pRd7" target="_blank" class="px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-brand-blue text-white text-xs font-semibold tracking-wider transition-all duration-300 shadow-md hover:shadow-brand-blue/30 inline-flex items-center gap-1.5">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5"></i> 預約免費諮詢
+                </a>
+            </div>
+
+            <!-- 行動端選單按鈕 -->
+            <button class="md:hidden p-2 text-slate-700 hover:text-brand-blue" id="mobileMenuBtn" aria-label="Toggle Menu">
+                <i data-lucide="menu" class="w-6 h-6" id="menuIcon"></i>
+            </button>
+        </div>
+
+        <!-- 行動端下拉選單 -->
+        <div class="hidden md:hidden glass-nav absolute top-20 left-0 w-full border-t border-slate-200/50 flex flex-col p-6 space-y-4 shadow-lg transition-all" id="mobileMenu">
+            <a href="#home" class="mobile-nav-link text-base font-semibold text-slate-700 py-2 border-b border-slate-100" onclick="closeMobileMenu()">首頁</a>
+            <a href="#about" class="mobile-nav-link text-base font-semibold text-slate-700 py-2 border-b border-slate-100" onclick="closeMobileMenu()">關於我</a>
+            <a href="#services" class="mobile-nav-link text-base font-semibold text-slate-700 py-2 border-b border-slate-100" onclick="closeMobileMenu()">AI 解決方案</a>
+            <a href="#portfolio" class="mobile-nav-link text-base font-semibold text-slate-700 py-2 border-b border-slate-100" onclick="closeMobileMenu()">案例展示</a>
+            <a href="#blog" class="mobile-nav-link text-base font-semibold text-slate-700 py-2 border-b border-slate-100" onclick="closeMobileMenu()">科技觀點</a>
+            <a href="#contact" class="mobile-nav-link text-base font-semibold text-slate-700 py-2" onclick="closeMobileMenu()">聯絡諮詢</a>
+            <a href="https://calendar.app.google/esxAJknJptd19pRd7" target="_blank" class="w-full text-center py-3 rounded-xl bg-slate-950 text-white font-bold text-sm shadow-md">
+                預約免費諮詢
+            </a>
+        </div>
+    </header>
+
+    <!-- 2️⃣ 首頁 Hero Section -->
+    <section id="home" class="min-h-screen flex items-center justify-center pt-28 pb-16 px-6 relative">
+        <div class="max-w-5xl mx-auto text-center space-y-8 z-10">
+            <!-- 上方精緻小標籤 -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border-brand-blue/20 text-brand-blue text-xs font-bold tracking-wider uppercase animate-fade-in">
+                <span class="w-2 h-2 rounded-full bg-brand-blue animate-ping"></span>
+                AI × 無人機 × 機器人教育
+            </div>
+
+            <!-- 主標題 (打字機效果) -->
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.25] text-slate-900 min-h-[120px] md:min-h-[160px] flex items-center justify-center">
+                <span id="typewriter" class="cursor-blink bg-gradient-to-r from-brand-blue via-brand-purple to-slate-950 bg-clip-text text-transparent"></span>
+            </h1>
+
+            <!-- 副標題 -->
+            <p class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-light leading-relaxed">
+                讓 AI、無人機與機器人成為學習的起點，而不是終點。
+            </p>
+
+            <!-- 轉換導向 CTA 按鈕與狀態 -->
+            <div class="flex flex-col items-center gap-4 pt-4">
+                <a href="#contact" 
+                   class="cta-hover-effect px-8 py-4 md:px-10 md:py-5 rounded-2xl bg-brand-blue hover:bg-brand-blue/90 text-white font-bold text-lg md:text-xl tracking-wide transition-all duration-300 shadow-xl shadow-brand-blue/30 inline-flex items-center gap-3 group relative overflow-hidden"
+                   id="heroCTA">
+                    <span>立即預約體驗</span>
+                    <i data-lucide="arrow-right" class="w-5.5 h-5.5 group-hover:translate-x-1.5 transition-transform"></i>
+                </a>
+                
+                <!-- Hover 顯示狀態容器 -->
+                <div class="h-6 flex items-center justify-center">
+                    <span id="ctaStatus" class="opacity-0 text-sm font-semibold text-brand-mint flex items-center gap-1.5 transition-all duration-300">
+                        <span class="w-2 h-2 rounded-full bg-brand-mint"></span>
+                        Status: Ready to Connect
+                    </span>
+                </div>
+            </div>
+
+            <!-- 優勢點標籤 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto pt-10 text-slate-500 text-sm">
+                <div class="flex items-center justify-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-brand-blue"></i> 100% 實作導向</div>
+                <div class="flex items-center justify-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-brand-blue"></i> 跨領域學程設計</div>
+                <div class="flex items-center justify-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-brand-blue"></i> AI 賦能原創教材</div>
+                <div class="flex items-center justify-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-brand-blue"></i> 頂尖教育機構合作</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3️⃣ 關於我 About Section -->
+    <section id="about" class="py-24 px-6 relative reveal-element">
+        <div class="max-w-7xl mx-auto">
+            <!-- 區塊標題 -->
+            <div class="text-center max-w-xl mx-auto mb-16">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-brand-blue mb-3">WHO I AM</h2>
+                <p class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">重塑科技教育的引路人</p>
+                <div class="w-12 h-1 bg-gradient-to-r from-brand-blue to-brand-purple mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- 高級品牌敘事版型 -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- 左側：視覺形象/名言卡片 -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="glass-card rounded-[2rem] overflow-hidden border border-slate-200/40 shadow-xl shadow-slate-500/10">
+                        <div class="relative">
+                            <img src="./51268ee4-da4a-4b4f-a610-878b1640cdda.jpg" alt="我的照片" class="w-full h-[420px] object-cover">
+                            <div class="absolute left-6 bottom-6 rounded-full bg-slate-950/80 px-4 py-2 text-sm text-white backdrop-blur-sm">
+                                真實面貌 │ 我就是老師與教練
+                            </div>
+                        </div>
+                        <div class="p-6 bg-slate-950/10">
+                            <p class="text-sm text-slate-600 leading-relaxed">
+                                這張照片展示我於城市街頭的自然風采，讓你看到不只是一名科技教育專家，更是一位貼近生活、真誠陪伴的學習夥伴。
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-3xl p-8 relative overflow-hidden border-l-4 border-l-brand-blue">
+                        <div class="absolute -right-10 -bottom-10 opacity-[0.03] text-brand-blue pointer-events-none">
+                            <i data-lucide="quote" class="w-64 h-64"></i>
+                        </div>
+                        <i data-lucide="quote" class="w-10 h-10 text-brand-blue/50 mb-6"></i>
+                        <p class="text-xl md:text-2xl font-bold text-slate-800 leading-relaxed mb-6">
+                            「教育不是灌輸，而是點燃火焰。我們要讓科技不再只是冷冰冰的代碼，而是孩子探索未來的翅膀。」
+                        </p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-blue to-brand-purple flex items-center justify-center text-white text-lg font-bold">
+                                走
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-lg">創意走廊 創辦人</h4>
+                                <p class="text-sm text-slate-400">AI / 無人機 / 機器人教育學家</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 數據指標展示 -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="glass-card rounded-2xl p-5 text-center">
+                            <p class="text-3xl font-extrabold text-brand-blue mb-1">500+</p>
+                            <p class="text-xs font-semibold text-slate-500">指導學生人數</p>
+                        </div>
+                        <div class="glass-card rounded-2xl p-5 text-center">
+                            <p class="text-3xl font-extrabold text-brand-purple mb-1">50+</p>
+                            <p class="text-xs font-semibold text-slate-500">學校與機構合作</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右側：高端品牌故事敘事 -->
+                <div class="lg:col-span-7 space-y-8">
+                    <div class="space-y-4">
+                        <h3 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-1.5 h-6 rounded bg-brand-blue"></span>
+                            從服務的起點，到科技前沿的實踐
+                        </h3>
+                        <p class="text-slate-600 leading-relaxed text-base md:text-lg">
+                            我曾深耕於高標準的服務產業，培養出對「需求」的敏銳直覺與非凡的同理心。隨後，我將這份直覺帶入了科技教育領域，完成跨領域的華麗轉身。在瞬息萬變的科技高壓決策環境中，我學會了如何保持冷靜，解構複雜問題，並將其轉化為簡單、高參與度的教學體驗。
+                        </p>
+                    </div>
+
+                    <!-- 個人經歷概要 -->
+                    <div class="glass-card rounded-3xl p-6 bg-slate-50 border border-slate-200/70 shadow-sm">
+                        <div class="flex flex-col gap-4">
+                            <div>
+                                <p class="text-xs uppercase tracking-[0.3em] text-brand-purple mb-2">我的經歷</p>
+                                <h4 class="text-xl font-bold text-slate-900">高楷崴 │ 創意走廊有限公司</h4>
+                                <p class="text-sm text-slate-500">3 年跨領域實務經驗，擅長 AI 教育、體驗設計與服務場域管理。</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-3 text-sm text-slate-600">
+                                <div>
+                                    <p class="font-semibold text-slate-900">工作經歷</p>
+                                    <ul class="list-disc list-inside space-y-1 mt-2">
+                                        <li>晶華酒店園外園外場值班經理</li>
+                                        <li>7-11 軍總門市值班經理</li>
+                                        <li>春風旅行社旅遊企劃</li>
+                                        <li>AI 陸海程式助教</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-slate-900">學習與校園經歷</p>
+                                    <ul class="list-disc list-inside space-y-1 mt-2">
+                                        <li>智光商職：合唱團成員，多次出演與比賽</li>
+                                        <li>榮獲品德優良獎</li>
+                                        <li>男生服務隊裝備長、班級股長</li>
+                                        <li>宏國德霖科技大學：射箭指導員與 AI VR 導覽活動規劃</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-slate-900">重要成就與證照</p>
+                                    <ul class="list-disc list-inside space-y-1 mt-2">
+                                        <li>2019 年全國高中職廚藝比賽 銅牌</li>
+                                        <li>2020 年花博國際素食展校園解說員與志工</li>
+                                        <li>紅十字協會急救員</li>
+                                        <li>射箭指導員</li>
+                                        <li>國民旅遊領團人員、旅遊產品操作人員</li>
+                                        <li>中餐烹飪丙級、飲料調製丙級</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4大核心優勢卡片式排版 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- 卡片 1 -->
+                        <div class="p-5 rounded-2xl bg-white/60 hover:bg-white border border-slate-200/50 hover:border-brand-blue/30 transition-all duration-300 group">
+                            <div class="w-10 h-10 rounded-lg bg-brand-blue/10 flex items-center justify-center text-brand-blue mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="git-branch" class="w-5 h-5"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-900 mb-1">跨領域背景（服務業 → 科技）</h4>
+                            <p class="text-sm text-slate-500 leading-relaxed">將高規格的服務溫度與嚴謹科技無縫結合，設計最具人本關懷的教學方案。</p>
+                        </div>
+
+                        <!-- 卡片 2 -->
+                        <div class="p-5 rounded-2xl bg-white/60 hover:bg-white border border-slate-200/50 hover:border-brand-purple/30 transition-all duration-300 group">
+                            <div class="w-10 h-10 rounded-lg bg-brand-purple/10 flex items-center justify-center text-brand-purple mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-900 mb-1">高壓決策能力</h4>
+                            <p class="text-sm text-slate-500 leading-relaxed">精準分析多變情境，帶領團隊與學習者在不確定性中迅速找到最佳策略。</p>
+                        </div>
+
+                        <!-- 卡片 3 -->
+                        <div class="p-5 rounded-2xl bg-white/60 hover:bg-white border border-slate-200/50 hover:border-brand-mint/30 transition-all duration-300 group">
+                            <div class="w-10 h-10 rounded-lg bg-brand-mint/10 flex items-center justify-center text-brand-mint mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="cpu" class="w-5 h-5"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-900 mb-1">教學 × AI × 體驗整合</h4>
+                            <p class="text-sm text-slate-500 leading-relaxed">融合互動式遊戲、無人機編程與 AI 生成技術，打破單向講授的框架。</p>
+                        </div>
+
+                        <!-- 卡片 4 -->
+                        <div class="p-5 rounded-2xl bg-white/60 hover:bg-white border border-slate-200/50 hover:border-brand-blue/30 transition-all duration-300 group">
+                            <div class="w-10 h-10 rounded-lg bg-brand-blue/10 flex items-center justify-center text-brand-blue mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-900 mb-1">未來願景（AI賦能）</h4>
+                            <p class="text-sm text-slate-500 leading-relaxed">致力於為家長與教育機構鋪平未來的科技之路，讓學子提早適應 AI 時代。</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 4️⃣ 服務項目 Services Section -->
+    <section id="services" class="py-24 px-6 bg-slate-100/50 border-y border-slate-200/40 relative reveal-element">
+        <div class="max-w-7xl mx-auto">
+            <!-- 區塊標題 -->
+            <div class="text-center max-w-xl mx-auto mb-16">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-brand-purple mb-3">SERVICES & SYSTEMS</h2>
+                <p class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">頂級教育解決方案</p>
+                <p class="text-sm text-slate-400 mt-2">我們堅信「理解 > 記憶」，實踐「做中學」的最佳體驗</p>
+                <div class="w-12 h-1 bg-gradient-to-r from-brand-purple to-brand-blue mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- 服務卡片網格 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- 卡片 1: 分齡 AI 教學系統 -->
+                <div class="glass-card p-6 rounded-2xl hover:translate-y-[-8px] hover:shadow-xl hover:shadow-brand-blue/5 border border-slate-200/30 hover:border-brand-blue/40 transition-all duration-500 flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-blue to-blue-400 text-white flex items-center justify-center mb-6 shadow-md shadow-brand-blue/10">
+                            <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-brand-blue transition-colors">分齡 AI 教學系統</h3>
+                        <p class="text-xs font-semibold text-brand-blue/80 mb-3 tracking-wider">適應不同階段的智能路徑</p>
+                        <p class="text-sm text-slate-500 leading-relaxed">
+                            針對國小到國中不同心智年齡，設計專屬的 AI 工具體驗。從圖形化積木訓練到提示詞工程實踐，循序漸進。
+                        </p>
+                    </div>
+                    <div class="pt-6 border-t border-slate-200/50 mt-6 flex items-center justify-between text-xs font-bold text-slate-400 group-hover:text-brand-blue transition-colors">
+                        <span>LEARN MORE</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- 卡片 2: 無人機 × 程式教育 -->
+                <div class="glass-card p-6 rounded-2xl hover:translate-y-[-8px] hover:shadow-xl hover:shadow-brand-purple/5 border border-slate-200/30 hover:border-brand-purple/40 transition-all duration-500 flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-purple to-fuchsia-400 text-white flex items-center justify-center mb-6 shadow-md shadow-brand-purple/10">
+                            <i data-lucide="navigation" class="w-6 h-6 rotate-45"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-brand-purple transition-colors">無人機 × 程式教育</h3>
+                        <p class="text-xs font-semibold text-brand-purple/80 mb-3 tracking-wider">空間邏輯與三維思考</p>
+                        <p class="text-sm text-slate-500 leading-relaxed">
+                            不只是一般的遙控，更融入 Python/Blockly 的編程，讓無人機在實體空間中編隊飛行，解鎖全方位的物理世界感知力。
+                        </p>
+                    </div>
+                    <div class="pt-6 border-t border-slate-200/50 mt-6 flex items-center justify-between text-xs font-bold text-slate-400 group-hover:text-brand-purple transition-colors">
+                        <span>LEARN MORE</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- 卡片 3: 邏輯思維與問題解決 -->
+                <div class="glass-card p-6 rounded-2xl hover:translate-y-[-8px] hover:shadow-xl hover:shadow-brand-mint/5 border border-slate-200/30 hover:border-brand-mint/40 transition-all duration-500 flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-mint to-teal-400 text-white flex items-center justify-center mb-6 shadow-md shadow-brand-mint/10">
+                            <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-brand-mint transition-colors">邏輯思維與問題解決</h3>
+                        <p class="text-xs font-semibold text-brand-mint/80 mb-3 tracking-wider">思考本質勝過盲目編碼</p>
+                        <p class="text-sm text-slate-500 leading-relaxed">
+                            獨創探究式教學，透過科技工具實作，引導學生面對不預期的錯誤、除錯、並推導出合規邏輯。
+                        </p>
+                    </div>
+                    <div class="pt-6 border-t border-slate-200/50 mt-6 flex items-center justify-between text-xs font-bold text-slate-400 group-hover:text-brand-mint transition-colors">
+                        <span>LEARN MORE</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- 卡片 4: 客製化學習方案 -->
+                <div class="glass-card p-6 rounded-2xl hover:translate-y-[-8px] hover:shadow-xl hover:shadow-brand-blue/5 border border-slate-200/30 hover:border-brand-blue/40 transition-all duration-500 flex flex-col justify-between group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white flex items-center justify-center mb-6 shadow-md shadow-brand-blue/10">
+                            <i data-lucide="sliders" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-brand-blue transition-colors">客製化學習方案</h3>
+                        <p class="text-xs font-semibold text-brand-blue/80 mb-3 tracking-wider">為獨特的個體量身打造</p>
+                        <p class="text-sm text-slate-500 leading-relaxed">
+                            為學校、教育機構與菁英家庭定制課程，根據學習目標匹配 AI 軟硬體，打造最有效率的高端課綱。
+                        </p>
+                    </div>
+                    <div class="pt-6 border-t border-slate-200/50 mt-6 flex items-center justify-between text-xs font-bold text-slate-400 group-hover:text-brand-blue transition-colors">
+                        <span>LEARN MORE</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 5️⃣ 作品集 / 案例展示 Portfolio Section -->
+    <section id="portfolio" class="py-24 px-6 relative reveal-element">
+        <div class="max-w-7xl mx-auto">
+            <!-- 區塊標題 -->
+            <div class="text-center max-w-xl mx-auto mb-16">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-brand-blue mb-3">CASE STUDIES</h2>
+                <p class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">關鍵教學與作品案例</p>
+                <p class="text-sm text-slate-400 mt-2">結合高互動與未來實踐力，展現孩子的科技創作潛能</p>
+                <div class="w-12 h-1 bg-gradient-to-r from-brand-blue to-brand-purple mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- 作品案例展示卡片網格 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- 案例 1: 機器人操作課程 (更新) -->
+                <div class="portfolio-card group relative rounded-2xl overflow-hidden glass-card border border-slate-200/40">
+                    <div class="aspect-video w-full bg-slate-50 overflow-hidden relative flex items-center justify-center text-slate-300">
+                        <!-- 機器人運動軌跡設計之優雅 SVG -->
+                        <svg class="w-1/2 h-1/2 text-brand-blue/15 transition-transform duration-500 group-hover:scale-110" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+                            <!-- 機械手臂結構 -->
+                            <rect x="40" y="70" width="20" height="15" rx="2" stroke-width="3" />
+                            <line x1="50" y1="70" x2="50" y2="45" stroke-width="4" stroke-linecap="round" />
+                            <circle cx="50" cy="45" r="5" fill="currentColor" />
+                            <line x1="50" y1="45" x2="70" y2="30" stroke-width="3" stroke-linecap="round" />
+                            <circle cx="70" cy="30" r="4" fill="currentColor" />
+                            <!-- 抓取目標物 -->
+                            <circle cx="70" cy="18" r="3" stroke-width="2" />
+                            <!-- 背景雷達掃描圓環 -->
+                            <circle cx="50" cy="50" r="35" stroke-dasharray="3 3" />
+                        </svg>
+                        <div class="absolute top-4 left-4 px-3 py-1 bg-slate-950/80 backdrop-blur-md rounded-full text-white text-[10px] font-bold tracking-widest uppercase">
+                            機器人技術
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h4 class="text-lg font-bold text-slate-900 mb-2">多軸機械手臂程式操作</h4>
+                        <p class="text-sm text-slate-500 mb-4 line-clamp-3">
+                            從認識機電伺服馬達、連桿力學開始，引導學生透過 Python 設計路徑與抓取演算法，實際控制實體機械手臂進行精確夾取。
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2.5 py-1 bg-slate-100 rounded-lg text-xs text-slate-500 font-medium">Kinematics</span>
+                            <span class="px-2.5 py-1 bg-slate-100 rounded-lg text-xs text-slate-500 font-medium">自動控制</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 案例 2: 無人機實作課程 -->
+                <div class="portfolio-card group relative rounded-2xl overflow-hidden glass-card border border-slate-200/40">
+                    <div class="aspect-video w-full bg-slate-50 overflow-hidden relative flex items-center justify-center text-slate-300">
+                        <!-- 無人機示意 SVG -->
+                        <svg class="w-1/2 h-1/2 text-brand-purple/15 transition-transform duration-500 group-hover:scale-110" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 20 L80 80 M80 20 L20 80" stroke-dasharray="1 1" />
+                            <!-- 槳葉旋轉動態 -->
+                            <circle cx="20" cy="20" r="12" stroke-dasharray="4 2" />
+                            <circle cx="80" cy="20" r="12" stroke-dasharray="4 2" />
+                            <circle cx="20" cy="80" r="12" stroke-dasharray="4 2" />
+                            <circle cx="80" cy="80" r="12" stroke-dasharray="4 2" />
+                            <!-- 中心控制器 -->
+                            <rect x="42" y="42" width="16" height="16" rx="4" fill="currentColor" fill-opacity="0.1" />
+                            <path d="M50 35 L50 65 M35 50 L65 50" />
+                        </svg>
+                        <div class="absolute top-4 left-4 px-3 py-1 bg-slate-950/80 backdrop-blur-md rounded-full text-white text-[10px] font-bold tracking-widest uppercase">
+                            無人機實作
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h4 class="text-lg font-bold text-slate-900 mb-2">自主程式障礙飛越賽</h4>
+                        <p class="text-sm text-slate-500 mb-4 line-clamp-3">
+                            國中生團隊挑戰！通過程式控制無人機，自動辨識不同形狀和顏色的圓環並穿過，徹底實踐空間編碼與微調演算法。
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2.5 py-1 bg-slate-100 rounded-lg text-xs text-slate-500 font-medium">Python Coding</span>
+                            <span class="px-2.5 py-1 bg-slate-100 rounded-lg text-xs text-slate-500 font-medium">路徑自主規劃</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 案例 3: 學生互動學習案例 -->
+                <div class="portfolio-card group relative rounded-2xl overflow-hidden glass-card border border-slate-200/40">
+                    <div class="aspect-video w-full bg-slate-50 overflow-hidden relative flex items-center justify-center text-slate-300">
+                        <!-- 智慧聯網對話 SVG -->
+                        <svg class="w-1/2 h-1/2 text-brand-blue/15 transition-transform duration-500 group-hover:scale-110" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="15" y="25" width="70" height="50" rx="8" />
+                            <!-- 眼部與智能交互顯示 -->
+                            <circle cx="35" cy="50" r="6" />
+                            <circle cx="65" cy="50" r="6" />
+                            <path d="M40 60 Q50 66 60 60" stroke-width="2" />
+                            <!-- 智慧連接線 -->
+                            <path d="M50 15 L50 25 M30 15 L35 25 M70 15 L65 25" stroke-dasharray="2 1" />
+                            <circle cx="50" cy="15" r="2" fill="currentColor" />
+                        </svg>
+                        <div class="absolute top-4 left-4 px-3 py-1 bg-slate-950/80 backdrop-blur-md rounded-full text-white text-[10px] font-bold tracking-widest uppercase">
+                            互動智能設計
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h4 class="text-lg font-bold text-slate-900 mb-2">未來城市物聯網（IoT）</h4>
+                        <p class="text-sm text-slate-500 mb-4 line-clamp-3">
+                            引導國小高年級生動手組裝智慧溫室、自感應垃圾桶，並串接 ChatGPT 進行生動有趣的擬人化對話反饋。
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2.5 py-1 bg-slate-100 rounded-lg text-xs text-slate-500 font-medium">IoT Sensors</span>
+                            <span class="px-2.5 py-1 bg-slate-100 rounded-lg text-xs text-slate-500 font-medium">ChatGPT API</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 6️⃣ 技術部落格 Blog Section -->
+    <section id="blog" class="py-24 px-6 bg-slate-100/50 border-t border-slate-200/40 relative reveal-element">
+        <div class="max-w-7xl mx-auto">
+            <!-- 區塊標題 -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+                <div>
+                    <h2 class="text-xs font-bold uppercase tracking-widest text-brand-blue mb-3">TECH EDUCATION BLOG</h2>
+                    <p class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">科技教育觀點與洞察</p>
+                </div>
+                <p class="text-sm text-slate-500 max-w-md">
+                    分享我們對於 AI 與 STEAM 教育的最新思維與產業實戰方法，幫助家長與學校走在最前端。
+                </p>
+            </div>
+
+            <!-- 文章列表區塊 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- 文章 1 -->
+                <article class="p-8 rounded-3xl bg-white hover:shadow-xl hover:shadow-brand-blue/5 transition-all duration-300 border border-slate-200/40 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3 text-xs text-slate-400">
+                            <span>2026.06.15</span>
+                            <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                            <span class="text-brand-blue font-semibold">AI 教育思維</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 leading-snug group-hover:text-brand-blue transition-colors">
+                            不只是背提示詞：如何在國中階段深植「AI 運算思維」？
+                        </h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">
+                            許多家長誤以為學 AI 就是背指令。實際上，我們更著重引導孩子理解「演算法極限」與「資料偏誤」，透過實際除錯建立起真正的架構邏輯。
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-bold text-brand-blue mt-6">
+                        <span>閱讀全文</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </article>
+
+                <!-- 文章 2 -->
+                <article class="p-8 rounded-3xl bg-white hover:shadow-xl hover:shadow-brand-purple/5 transition-all duration-300 border border-slate-200/40 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3 text-xs text-slate-400">
+                            <span>2026.05.28</span>
+                            <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                            <span class="text-brand-purple font-semibold">硬體創新實踐</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 leading-snug group-hover:text-brand-purple transition-colors">
+                            無人機如何訓練孩子的三維空間感知能力與極限心理調適
+                        </h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">
+                            手腦協調只是第一步。在面對瞬間風阻和干擾時，寫好的程式該如何自適應？這種高壓除錯的過程，培養了孩子未來不可多得的心理韌性。
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-bold text-brand-purple mt-6">
+                        <span>閱讀全文</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 7️⃣ 聯絡我 Contact Section (高轉換 CTA 重點區) -->
+    <section id="contact" class="py-24 px-6 relative reveal-element">
+        <div class="max-w-5xl mx-auto">
+            <!-- 高轉換 Landing Page SaaS 式卡片區 -->
+            <div class="glass-card rounded-3xl p-8 md:p-14 relative overflow-hidden border border-brand-blue/20 shadow-2xl shadow-brand-blue/5">
+                
+                <!-- 環境光流 -->
+                <div class="absolute -right-20 -top-20 w-80 h-80 radial-glow-1 pointer-events-none"></div>
+                <div class="absolute -left-20 -bottom-20 w-80 h-80 radial-glow-2 pointer-events-none"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10 items-center">
+                    
+                    <!-- 左側資訊 -->
+                    <div class="lg:col-span-6 space-y-6">
+                        <span class="px-3.5 py-1.5 rounded-full bg-brand-mint/10 text-brand-mint text-xs font-bold tracking-wider">
+                            立即諮詢，搶先預約體驗
+                        </span>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                            踏出駕馭未來科技的<br>第一步
+                        </h2>
+                        <p class="text-slate-500 leading-relaxed text-sm md:text-base">
+                            無論您是想為孩子尋找高含金量的啟蒙方案，還是希望為學校導入最前沿的無人機與 AI 學程，我們都提供免費的一對一專業線上諮詢，為您拆解最適合的學習藍圖。
+                        </p>
+
+                        <!-- 信任感指標區 -->
+                        <div class="space-y-3 pt-4 border-t border-slate-200/50">
+                            <div class="flex items-center gap-3 text-slate-600 text-sm">
+                                <span class="w-5 h-5 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue">
+                                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                </span>
+                                <span><strong>立即安排</strong>｜專屬顧問一對一線上解答</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-slate-600 text-sm">
+                                <span class="w-5 h-5 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue">
+                                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                </span>
+                                <span><strong>快速回覆</strong>｜工作日 24 小時內專人連繫</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-slate-600 text-sm">
+                                <span class="w-5 h-5 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue">
+                                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                </span>
+                                <span><strong>專業諮詢</strong>｜量身定制、絕非罐頭回覆</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右側聯絡表單 & Google日曆排程按鈕 -->
+                    <div class="lg:col-span-6 space-y-6 bg-white/70 p-6 md:p-8 rounded-2xl border border-slate-200/50 shadow-sm">
+                        
+                        <div class="text-center space-y-2">
+                            <h3 class="font-bold text-lg text-slate-900">排程免費線上諮詢</h3>
+                            <p class="text-xs text-slate-400">選擇適合您的時間，快速卡位</p>
+                        </div>
+
+                        <!-- 頂級主轉換 CTA 按鈕 -->
+                        <a href="https://calendar.app.google/esxAJknJptd19pRd7" 
+                           target="_blank"
+                           class="cta-hover-effect w-full py-4 rounded-xl bg-brand-blue hover:bg-brand-blue/90 text-white font-bold text-center tracking-wider transition-all duration-300 shadow-lg shadow-brand-blue/20 flex items-center justify-center gap-2 group">
+                            <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                            <span>👉 預約免費諮詢</span>
+                        </a>
+
+                        <div class="relative flex py-2 items-center">
+                            <div class="flex-grow border-t border-slate-200"></div>
+                            <span class="flex-shrink mx-4 text-slate-300 text-xs font-bold uppercase tracking-widest">或填寫快速表單</span>
+                            <div class="flex-grow border-t border-slate-200"></div>
+                        </div>
+
+                        <!-- 快速收集資訊表單 -->
+                        <form id="contactForm" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">您的姓名 / 稱呼</label>
+                                <input type="text" required class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue text-sm transition-all bg-white" placeholder="張先生/林小姐">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">聯絡電子郵件</label>
+                                <input type="email" required class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue text-sm transition-all bg-white" placeholder="you@example.com">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">主要諮詢需求</label>
+                                <select class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue text-sm transition-all bg-white">
+                                    <option>家長：為孩子挑選合適課程</option>
+                                    <option>學校：無人機與AI課程導入</option>
+                                    <option>機構：尋求科技教育內容授權合作</option>
+                                    <option>其他合作需求</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full py-3 rounded-lg border border-slate-900/10 hover:bg-slate-900 text-slate-900 hover:text-white font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-1.5">
+                                <i data-lucide="send" class="w-4 h-4"></i> 送出需求，我將在 24H 內回覆你
+                            </button>
+                        </form>
+
+                        <!-- 表單成功提示框 (預設隱藏) -->
+                        <div id="formSuccessMsg" class="hidden p-4 rounded-lg bg-emerald-50 text-emerald-800 text-xs border border-emerald-200 flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            <span>感謝您的提交！我們已收到您的資訊，會儘快與您聯絡。</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8️⃣ 頁尾 Footer -->
+    <footer class="py-12 px-6 border-t border-slate-200/50 bg-white relative">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-brand-blue flex items-center justify-center text-white">
+                    <i data-lucide="compass" class="w-4.5 h-4.5"></i>
+                </span>
+                <span class="font-bold text-slate-800">創意走廊</span>
+                <span class="text-xs text-slate-400">| © 2026 Creative Corridor. All rights reserved.</span>
+            </div>
+            
+            <div class="flex items-center gap-6 text-xs text-slate-400">
+                <a href="#" class="hover:text-brand-blue transition-colors">隱私條款</a>
+                <a href="#" class="hover:text-brand-blue transition-colors">服務聲明</a>
+                <a href="mailto:info@creativecorridor.edu" class="hover:text-brand-blue transition-colors flex items-center gap-1">
+                    <i data-lucide="mail" class="w-3.5 h-3.5"></i> info@creativecorridor.edu
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 原生 JavaScript 腳本 -->
+    <script>
+        // 渲染 Lucide 圖示
+        lucide.createIcons();
+
+        // 1. 打字機效果 (Hero Section)
+        const typewriterElement = document.getElementById('typewriter');
+        const phrases = [
+            "不只是操控，是駕馭下一世代科技",
+            "讓 AI、無人機與機器人成為學習的起點，而不是終點"
+        ];
+        let phraseIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let delay = 100; // 預設打字速度
+
+        function type() {
+            const currentPhrase = phrases[phraseIndex];
+            
+            if (isDeleting) {
+                typewriterElement.textContent = currentPhrase.substring(0, charIndex - 1);
+                charIndex--;
+                delay = 40; // 刪除速度稍快
+            } else {
+                typewriterElement.textContent = currentPhrase.substring(0, charIndex + 1);
+                charIndex++;
+                delay = 100; // 打字正常速度
+            }
+
+            if (!isDeleting && charIndex === currentPhrase.length) {
+                isDeleting = true;
+                delay = 2500; // 在末尾停留較長時間
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                phraseIndex = (phraseIndex + 1) % phrases.length;
+                delay = 800; // 在開始前停留片刻
+            }
+
+            setTimeout(type, delay);
+        }
+        
+        // 啟動打字機
+        setTimeout(type, 500);
+
+        // 2. 背景淡藍/微紫粒子 Canvas 連線效果
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let particlesArray = [];
+        const numberOfParticles = 30; // 保持適度粒子數量，優雅不雜亂
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight * 2.8; 
+        }
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initParticles();
+        });
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 0.3 - 0.15;
+                this.speedY = Math.random() * 0.3 - 0.15;
+                this.color = Math.random() > 0.5 ? 'rgba(37, 99, 235, 0.12)' : 'rgba(124, 58, 237, 0.1)';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
+                if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function connectParticles() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                                 + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    
+                    if (distance < 25000) {
+                        opacityValue = 1 - (distance / 25000);
+                        ctx.strokeStyle = `rgba(37, 99, 235, ${opacityValue * 0.06})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            connectParticles();
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // 3. CTA 按鈕 Hover 微互動 (Status 顯示)
+        const heroCTA = document.getElementById('heroCTA');
+        const ctaStatus = document.getElementById('ctaStatus');
+
+        heroCTA.addEventListener('mouseenter', () => {
+            ctaStatus.style.opacity = '1';
+            ctaStatus.style.transform = 'translateY(0)';
+        });
+
+        heroCTA.addEventListener('mouseleave', () => {
+            ctaStatus.style.opacity = '0';
+            ctaStatus.style.transform = 'translateY(-4px)';
+        });
+
+        // 4. 行動端選單展開與收起
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const menuIcon = document.getElementById('menuIcon');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            const isHidden = mobileMenu.classList.contains('hidden');
+            if (isHidden) {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.setAttribute('data-lucide', 'x');
+            } else {
+                mobileMenu.classList.add('hidden');
+                menuIcon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons();
+        });
+
+        function closeMobileMenu() {
+            mobileMenu.classList.add('hidden');
+            menuIcon.setAttribute('data-lucide', 'menu');
+            lucide.createIcons();
+        }
+
+        // 5. 滾動動畫 (Intersection Observer)
+        const reveals = document.querySelectorAll('.reveal-element');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); 
+                }
+            });
+        }, {
+            threshold: 0.08,
+            rootMargin: '0px 0px -40px 0px'
+        });
+
+        reveals.forEach(el => observer.observe(el));
+
+        // 6. 導覽列滾動陰影與高亮
+        const header = document.getElementById('mainHeader');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 40) {
+                header.classList.add('shadow-md', 'h-16');
+                header.classList.remove('h-20');
+            } else {
+                header.classList.remove('shadow-md', 'h-16');
+                header.classList.add('h-20');
+            }
+
+            let currentSec = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 120;
+                if (window.pageYOffset >= sectionTop) {
+                    currentSec = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('text-brand-blue', 'font-semibold');
+                link.classList.add('text-slate-600');
+                if (link.getAttribute('data-sec') === currentSec) {
+                    link.classList.add('text-brand-blue', 'font-semibold');
+                    link.classList.remove('text-slate-600');
+                }
+            });
+        });
+
+        // 7. 聯絡表單送出模擬 (客製化反饋，不使用彈窗)
+        const contactForm = document.getElementById('contactForm');
+        const formSuccessMsg = document.getElementById('formSuccessMsg');
+
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            formSuccessMsg.classList.remove('hidden');
+            contactForm.reset();
+            setTimeout(() => {
+                formSuccessMsg.classList.add('hidden');
+            }, 6000);
+        });
+    </script>
+</body>
+</html>
